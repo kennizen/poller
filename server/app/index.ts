@@ -1,13 +1,14 @@
 import express from "express";
 import cors from "cors";
-import router from "./routes/route";
+import userRouter from "./routes/user";
 
 const app = express();
 
-// global middlewares 
+// global middlewares
 app.use(cors());
+app.use(express.json());
 
 // routes
-app.use("/", router);
+app.use("/user", userRouter);
 
 export default app;
