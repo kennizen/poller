@@ -6,11 +6,11 @@ dotenv.config();
 
 const port = process.env.PORT || 8000;
 export const pool = new Pool({
-  user: "postgres",
-  password: process.env.DB_PASSWORD,
-  host: "localhost",
+  user: "prach123",
+  password: process.env.DB_PASSWORD_ONLINE,
+  host: "dpg-cjkqko0cfp5c73bv6eog-a.singapore-postgres.render.com",
   port: 5432,
-  database: "pollerDb",
+  database: "pollerdb",
 });
 
 pool.on("error", (err) => console.log("error connecting to postgres", err));
