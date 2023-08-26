@@ -1,16 +1,17 @@
-import { resultifyAsync } from "../../hof/result";
 import { pool } from "../../server";
 import { DefaultAPIError } from "../../errors/ApiError";
 import { UserInfo } from "../controllers/user";
 import { DefaultAPISuccess } from "../../success/ApiSuccess";
 import { genSalt, hash } from "bcrypt";
 
-async function addUserServiceFunc({ email, password, username, avatar }: UserInfo) {
+export async function addUserService({ email, password, username, avatar }: UserInfo) {
   const user = await pool.query(`SELECT * FROM users WHERE email=$1`, [email]);
 
   if (user.rows.length > 0) {
     throw new DefaultAPIError(409, "user already exists");
   }
+
+
 
   const salt = await genSalt(10);
   const hashedPassword = await hash(password, salt);
@@ -23,6 +24,3 @@ async function addUserServiceFunc({ email, password, username, avatar }: UserInf
   return new DefaultAPISuccess<string>(201, "User created", resUser.rows[0].user_id as string);
 }
 
-export const addUserService = resultifyAsync<typeof addUserServiceFunc, DefaultAPIError>(
-  addUserServiceFunc
-);
