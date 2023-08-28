@@ -50,9 +50,7 @@ export async function intoResultAsync<
  * Synchronous Version
  */
 export function resultify<T extends (...args: any[]) => any>(cb: T) {
-  return function <E extends Error = Error>(
-    ...args: Parameters<T>
-  ): Result<ReturnType<T>, E> {
+  return function <E extends Error = Error>(...args: Parameters<T>): Result<ReturnType<T>, E> {
     try {
       const res = cb(...args);
       return [res, null];
@@ -67,10 +65,10 @@ export function resultify<T extends (...args: any[]) => any>(cb: T) {
  * Approach 2
  * Asynchronous Version
  */
-export function resultifyAsync<T extends (...args: any[]) => Promise<any>, E extends Error = Error>(cb: T) {
-  return async function(
-    ...args: Parameters<T>
-  ): Promise<Result<Awaited<ReturnType<T>>, E>> {
+export function resultifyAsync<T extends (...args: any[]) => Promise<any>, E extends Error = Error>(
+  cb: T
+) {
+  return async function (...args: Parameters<T>): Promise<Result<Awaited<ReturnType<T>>, E>> {
     try {
       const res = await cb(...args);
       return [res, null];

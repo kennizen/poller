@@ -1,18 +1,25 @@
 import { pool } from "../../server";
 import { DefaultAPIError } from "../../errors/ApiError";
-import { UserInfo } from "../controllers/user";
+import { UserLoginInfo, UserRegistrationInfo } from "../controllers/user";
 import { DefaultAPISuccess } from "../../success/ApiSuccess";
-import { genSalt, hash } from "bcrypt";
+import { compare, genSalt, hash } from "bcrypt";
+import { AES, enc } from "crypto-js";
+import JWTAuth from "../../lib/JWTAuth";
 
-export async function addUserService({ email, password, username, avatar }: UserInfo) {
+// user sign up
+export async function registerUserService({
+  email,
+  password,
+  username,
+  avatar,
+}: UserRegistrationInfo) {
   const user = await pool.query(`SELECT * FROM users WHERE email=$1`, [email]);
 
   if (user.rows.length > 0) {
     throw new DefaultAPIError(409, "user already exists");
   }
 
-
-
+  // const decryptedPassword = AES.decrypt(password, process.env.CRYPTO_SECRET).toString(enc.Utf8);
   const salt = await genSalt(10);
   const hashedPassword = await hash(password, salt);
 
@@ -21,6 +28,31 @@ export async function addUserService({ email, password, username, avatar }: User
     [username, email, hashedPassword, avatar ?? ""]
   );
 
-  return new DefaultAPISuccess<string>(201, "User created", resUser.rows[0].user_id as string);
+  const token = new JWTAuth().encode({
+    userId: resUser.rows[0].user_id,
+  });
+
+  return new DefaultAPISuccess<string>(201, "User created", token);
 }
 
+// user login
+export async function loginUserService({ email, password }: UserLoginInfo) {
+  const user = await pool.query(`SELECT * FROM users WHERE email=$1`, [email]);
+
+  if (user.rows.length <= 0) {
+    throw new DefaultAPIError(401, "email id not found");
+  }
+
+  // const decryptedPassword = AES.decrypt(password, process.env.CRYPTO_SECRET).toString(enc.Utf8);
+  const isPasswordValid = await compare(password, user.rows[0].password);
+
+  if (!isPasswordValid) {
+    throw new DefaultAPIError(401, "invalid password");
+  }
+
+  const token = new JWTAuth().encode({
+    userId: user.rows[0].user_id,
+  });
+
+  return new DefaultAPISuccess<string>(200, "login successfull", token);
+}
