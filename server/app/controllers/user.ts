@@ -5,19 +5,19 @@ import { sendSuccessResponse } from "../../success/utility-functions";
 import { intoResultAsync } from "../../hof/result";
 import { DefaultAPIError } from "../../errors/ApiError";
 
-export interface UserRegistrationInfo {
+export interface IUserRegistrationInfo {
   username: string;
   email: string;
   password: string;
   avatar?: string;
 }
 
-export interface UserLoginInfo {
+export interface IUserLoginInfo {
   email: string;
   password: string;
 }
 
-export async function registerUser(...[req, res]: InputType<UserRegistrationInfo>) {
+export async function registerUser(...[req, res]: InputType<IUserRegistrationInfo>) {
   const { email, password, username, avatar } = req.body;
 
   const [result, error] = await intoResultAsync<typeof registerUserService, DefaultAPIError>(
@@ -37,7 +37,7 @@ export async function registerUser(...[req, res]: InputType<UserRegistrationInfo
   return sendSuccessResponse(res, result);
 }
 
-export async function loginUser(...[req, res]: InputType<UserLoginInfo>) {
+export async function loginUser(...[req, res]: InputType<IUserLoginInfo>) {
   const { email, password } = req.body;
 
   const [result, error] = await intoResultAsync<typeof loginUserService, DefaultAPIError>(

@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import userRouter from "./routes/user";
+import pollRouter from "./routes/poll";
 
 const app = express();
 
@@ -10,5 +11,6 @@ app.use(express.json());
 
 // routes
 app.use("/user", userRouter);
+app.use("/poll", pollRouter);
 
 export default app;

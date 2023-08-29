@@ -1,10 +1,20 @@
 import { Router } from "express";
 import { loginUser, registerUser } from "../controllers/user";
-import validUserInfo from "../middlewares/validUserInfo";
+import { emailValidator } from "../middlewares/emailValidator";
+import { passwordValidator } from "../middlewares/passwordValidator";
+import { usernameValidator } from "../middlewares/usernameValidator";
+import { emptyValuesValidator } from "../middlewares/emptyValuesValidator";
 
-const router = Router();
+const userRouter = Router();
 
-router.post("/register", validUserInfo, registerUser);
-router.post("/login", validUserInfo, loginUser);
+userRouter.post(
+  "/register",
+  emptyValuesValidator,
+  emailValidator,
+  passwordValidator,
+  usernameValidator,
+  registerUser
+);
+userRouter.post("/login", emptyValuesValidator, emailValidator, passwordValidator, loginUser);
 
-export default router;
+export default userRouter;

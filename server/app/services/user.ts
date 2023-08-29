@@ -1,10 +1,14 @@
 import { pool } from "../../server";
 import { DefaultAPIError } from "../../errors/ApiError";
-import { UserLoginInfo, UserRegistrationInfo } from "../controllers/user";
+import { IUserLoginInfo, IUserRegistrationInfo } from "../controllers/user";
 import { DefaultAPISuccess } from "../../success/ApiSuccess";
 import { compare, genSalt, hash } from "bcrypt";
 import { AES, enc } from "crypto-js";
 import JWTAuth from "../../lib/JWTAuth";
+
+export type UserDataInJWT = {
+  userId: string;
+};
 
 // user sign up
 export async function registerUserService({
@@ -12,7 +16,7 @@ export async function registerUserService({
   password,
   username,
   avatar,
-}: UserRegistrationInfo) {
+}: IUserRegistrationInfo) {
   const user = await pool.query(`SELECT * FROM users WHERE email=$1`, [email]);
 
   if (user.rows.length > 0) {
@@ -25,10 +29,10 @@ export async function registerUserService({
 
   const resUser = await pool.query(
     "INSERT INTO users (username, email, password, avatar) VALUES ($1, $2, $3, $4) RETURNING user_id",
-    [username, email, hashedPassword, avatar ?? ""]
+    [username, email, hashedPassword, avatar ?? null]
   );
 
-  const token = new JWTAuth().encode({
+  const token = new JWTAuth<UserDataInJWT>().encode({
     userId: resUser.rows[0].user_id,
   });
 
@@ -36,7 +40,7 @@ export async function registerUserService({
 }
 
 // user login
-export async function loginUserService({ email, password }: UserLoginInfo) {
+export async function loginUserService({ email, password }: IUserLoginInfo) {
   const user = await pool.query(`SELECT * FROM users WHERE email=$1`, [email]);
 
   if (user.rows.length <= 0) {
@@ -50,7 +54,7 @@ export async function loginUserService({ email, password }: UserLoginInfo) {
     throw new DefaultAPIError(401, "invalid password");
   }
 
-  const token = new JWTAuth().encode({
+  const token = new JWTAuth<UserDataInJWT>().encode({
     userId: user.rows[0].user_id,
   });
 
