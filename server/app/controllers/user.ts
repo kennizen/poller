@@ -4,6 +4,7 @@ import { sendErrorResponse } from "../../errors/utility-functions";
 import { sendSuccessResponse } from "../../success/utility-functions";
 import { intoResultAsync } from "../../hof/result";
 import { DefaultAPIError } from "../../errors/ApiError";
+import { checkUndefinedValues } from "../../utils/checkUndefinedValues";
 
 export interface IUserRegistrationInfo {
   username: string;
@@ -19,6 +20,12 @@ export interface IUserLoginInfo {
 
 export async function registerUser(...[req, res]: InputType<IUserRegistrationInfo>) {
   const { email, password, username, avatar } = req.body;
+
+  const val = checkUndefinedValues([email, password, username, avatar]);
+
+  if (val) {
+    return sendErrorResponse(res, val);
+  }
 
   const [result, error] = await intoResultAsync<typeof registerUserService, DefaultAPIError>(
     registerUserService,
@@ -39,6 +46,12 @@ export async function registerUser(...[req, res]: InputType<IUserRegistrationInf
 
 export async function loginUser(...[req, res]: InputType<IUserLoginInfo>) {
   const { email, password } = req.body;
+
+  const val = checkUndefinedValues([email, password]);
+
+  if (val) {
+    return sendErrorResponse(res, val);
+  }
 
   const [result, error] = await intoResultAsync<typeof loginUserService, DefaultAPIError>(
     loginUserService,
