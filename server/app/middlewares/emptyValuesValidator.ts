@@ -5,11 +5,12 @@ import { InputType } from "../../utils/typeUtils";
 export function emptyValuesValidator(...[req, res, next]: InputType<Record<string, any>>) {
   const obj = req.body;
 
-  if (Object.values(obj).some((val) => val === undefined || val === null)) {
-    return sendErrorResponse(
-      res,
-      new DefaultAPIError(400, "received null or undefined values")
-    );
+  if (
+    Object.values(obj).some(
+      (val) => val === undefined || val === null || (Array.isArray(val) && val.length === 0)
+    )
+  ) {
+    return sendErrorResponse(res, new DefaultAPIError(400, "received null or undefined values"));
   }
 
   next();

@@ -42,7 +42,7 @@ export async function getAllPollsService() {
     });
   }
 
-  return new DefaultAPISuccess(201, "Poll created", ret);
+  return new DefaultAPISuccess(200, "Polls", ret);
 }
 
 export async function updatePollService({ options, poll_id, multi_selection, title }: IUpdatePoll) {
